@@ -4,6 +4,9 @@ from dataclasses import dataclass
 from typing import Any, Iterator
 
 
+_MISSING = object()
+
+
 @dataclass
 class Node:
     key: Any
@@ -73,14 +76,11 @@ class Dictionary:
         old_buckets = self._buckets
         self._capacity *= 2
         self._buckets = [[] for _ in range(self._capacity)]
-        old_size = self._size
         self._size = 0
 
         for bucket in old_buckets:
             for node in bucket:
                 self[node.key] = node.value
-
-        self._size = old_size
 
     def clear(self) -> None:
         self._buckets = [[] for _ in range(self._capacity)]
@@ -92,7 +92,7 @@ class Dictionary:
         except KeyError:
             return default
 
-    def pop(self, key: Any, default: Any = None) -> Any:
+    def pop(self, key: Any, default: Any = _MISSING) -> Any:
         hash_value = hash(key)
         index = self._get_index(hash_value)
         bucket = self._buckets[index]
@@ -104,7 +104,7 @@ class Dictionary:
                 self._size -= 1
                 return value
 
-        if default is not None:
+        if default is not _MISSING:
             return default
 
         raise KeyError(key)
